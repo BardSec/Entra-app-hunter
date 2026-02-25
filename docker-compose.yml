@@ -2,7 +2,7 @@ services:
   backend:
     build: ./backend
     ports:
-      - "5000:5000"
+      - "${BACKEND_PORT:-5000}:${BACKEND_PORT:-5000}"
     environment:
       - MOCK_MODE=${MOCK_MODE:-true}
       - AUTH_MODE=${AUTH_MODE:-app}
@@ -10,6 +10,7 @@ services:
       - CLIENT_ID=${CLIENT_ID:-}
       - CLIENT_SECRET=${CLIENT_SECRET:-}
       - FLASK_DEBUG=true
+      - BACKEND_PORT=${BACKEND_PORT:-5000}
     volumes:
       - ./backend:/app
     restart: unless-stopped
@@ -19,7 +20,7 @@ services:
     ports:
       - "${FRONTEND_PORT:-3000}:${FRONTEND_PORT:-3000}"
     environment:
-      - BACKEND_URL=http://backend:5000
+      - BACKEND_URL=http://backend:${BACKEND_PORT:-5000}
       - FRONTEND_PORT=${FRONTEND_PORT:-3000}
       - VITE_AUTH_MODE=${VITE_AUTH_MODE:-mock}
       - VITE_CLIENT_ID=${VITE_CLIENT_ID:-}
