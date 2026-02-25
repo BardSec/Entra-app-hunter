@@ -1,0 +1,30 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    environment:
+      - MOCK_MODE=${MOCK_MODE:-true}
+      - AUTH_MODE=${AUTH_MODE:-app}
+      - TENANT_ID=${TENANT_ID:-}
+      - CLIENT_ID=${CLIENT_ID:-}
+      - CLIENT_SECRET=${CLIENT_SECRET:-}
+      - FLASK_DEBUG=true
+    volumes:
+      - ./backend:/app
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - BACKEND_URL=http://backend:5000
+      - VITE_AUTH_MODE=${VITE_AUTH_MODE:-mock}
+      - VITE_CLIENT_ID=${VITE_CLIENT_ID:-}
+      - VITE_TENANT_ID=${VITE_TENANT_ID:-}
+    volumes:
+      - ./frontend/src:/app/src
+    depends_on:
+      - backend
+    restart: unless-stopped
