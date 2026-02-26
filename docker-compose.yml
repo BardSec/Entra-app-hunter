@@ -22,6 +22,7 @@ services:
     environment:
       - BACKEND_URL=http://backend:${BACKEND_PORT:-5000}
       - FRONTEND_PORT=${FRONTEND_PORT:-3000}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost}
       - VITE_AUTH_MODE=${VITE_AUTH_MODE:-mock}
       - VITE_CLIENT_ID=${VITE_CLIENT_ID:-}
       - VITE_TENANT_ID=${VITE_TENANT_ID:-}
