@@ -14,6 +14,10 @@ def create_app() -> Flask:
     app.register_blueprint(dashboard_bp, url_prefix="/api")
     app.register_blueprint(compliance_bp, url_prefix="/api")
 
+    @app.errorhandler(PermissionError)
+    def handle_permission_error(e):
+        return jsonify({"error": "Unauthorized", "message": str(e)}), 401
+
     @app.route("/api/health")
     def health():
         return jsonify({

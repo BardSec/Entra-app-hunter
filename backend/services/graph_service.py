@@ -44,7 +44,12 @@ class RealGraphService:
     """
 
     def __init__(self, access_token: str | None = None):
-        self._token = access_token or self._acquire_app_token()
+        if access_token:
+            self._token = access_token
+        elif Config.AUTH_MODE == "delegated":
+            raise PermissionError("No Bearer token provided for delegated auth mode")
+        else:
+            self._token = self._acquire_app_token()
 
     def _acquire_app_token(self) -> str:
         """Acquire an app-only token using the client credentials flow."""
