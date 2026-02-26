@@ -14,6 +14,17 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Clear stale token on 401 so the next request won't reuse it
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      sessionStorage.removeItem("entra_access_token");
+    }
+    return Promise.reject(error);
+  }
+);
+
 // ── API functions ─────────────────────────────────────────────────────────────
 
 export const fetchHealth = () => api.get("/health").then((r) => r.data);

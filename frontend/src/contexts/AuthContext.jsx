@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useMsal, useIsAuthenticated } from "@azure/msal-react";
 import { InteractionStatus } from "@azure/msal-browser";
 import { GRAPH_SCOPES } from "../lib/msal";
@@ -24,21 +24,33 @@ function StaticAuthProvider({ children }) {
 function MsalAuthProvider({ children }) {
   const { instance, accounts, inProgress } = useMsal();
   const isAuthenticated = useIsAuthenticated();
-  const isLoading = inProgress !== InteractionStatus.None;
+  const [tokenReady, setTokenReady] = useState(false);
   const user = accounts[0] ?? null;
+
+  // isLoading stays true while MSAL is processing OR while we are waiting for
+  // the initial silent token acquisition to complete.  This prevents API calls
+  // (and the 401 that follows) from firing before the token lands in storage.
+  const isMsalBusy = inProgress !== InteractionStatus.None;
+  const isLoading = isMsalBusy || (isAuthenticated && !tokenReady);
 
   // Keep the stored access token fresh whenever the active account changes
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setTokenReady(false);
+      return;
+    }
+    setTokenReady(false);
     instance
       .acquireTokenSilent({ scopes: GRAPH_SCOPES, account: user })
       .then((result) => {
         sessionStorage.setItem("entra_access_token", result.accessToken);
+        setTokenReady(true);
       })
       .catch(() => {
         // Silent renewal failed (e.g. consent required) — clear stale token;
-        // the user will be prompted again on the next API call via popup.
+        // the user will be prompted to sign in again via the AuthGuard.
         sessionStorage.removeItem("entra_access_token");
+        setTokenReady(false);
       });
   }, [user, instance]);
 
