@@ -42,14 +42,16 @@ function MsalAuthProvider({ children }) {
       });
   }, [user, instance]);
 
+  const popupRedirectUri = `${window.location.origin}/blank.html`;
+
   const login = () =>
-    instance.loginPopup({ scopes: GRAPH_SCOPES }).then((result) => {
+    instance.loginPopup({ scopes: GRAPH_SCOPES, redirectUri: popupRedirectUri }).then((result) => {
       sessionStorage.setItem("entra_access_token", result.accessToken);
     });
 
   const logout = () => {
     sessionStorage.removeItem("entra_access_token");
-    instance.logoutPopup();
+    instance.logoutPopup({ postLogoutRedirectUri: popupRedirectUri });
   };
 
   return (
