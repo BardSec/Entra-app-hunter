@@ -13,6 +13,7 @@ const allowedHosts = process.env.ALLOWED_HOSTS === "all"
 
 export default defineConfig({
   plugins: [react()],
+  envDir: "../",
   server: {
     host: "0.0.0.0",
     port,
