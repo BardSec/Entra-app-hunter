@@ -6,7 +6,10 @@ import {
   ShieldAlert,
   ClipboardCheck,
   Shield,
+  LogOut,
 } from "lucide-react";
+import { useAuth } from "../../contexts/AuthContext";
+import { getInitials } from "../../lib/utils";
 
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
@@ -17,6 +20,8 @@ const NAV_ITEMS = [
 ];
 
 export default function Sidebar() {
+  const { user, logout } = useAuth();
+
   return (
     <aside className="w-60 flex-shrink-0 bg-gray-900 flex flex-col h-screen sticky top-0">
       {/* Logo */}
@@ -51,10 +56,32 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Footer */}
-      <div className="px-5 py-4 border-t border-gray-700/50">
-        <p className="text-xs text-gray-600">Mock data mode</p>
-        <p className="text-xs text-gray-500 mt-0.5">Lakewood USD</p>
+      {/* Footer — shows signed-in user in delegated mode, mode label otherwise */}
+      <div className="px-4 py-4 border-t border-gray-700/50">
+        {user ? (
+          <div className="flex items-center gap-2.5">
+            <span className="inline-flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-indigo-500 text-white text-xs font-semibold">
+              {getInitials(user.name || user.username || "?")}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium text-gray-300 truncate leading-tight">
+                {user.name || user.username}
+              </p>
+              <p className="text-xs text-gray-500 truncate leading-tight">
+                {user.username}
+              </p>
+            </div>
+            <button
+              onClick={logout}
+              title="Sign out"
+              className="flex-shrink-0 text-gray-500 hover:text-gray-300 transition-colors p-1 rounded"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ) : (
+          <p className="text-xs text-gray-600">Mock data mode</p>
+        )}
       </div>
     </aside>
   );
