@@ -111,9 +111,9 @@ function ComplianceAppCard({ app, onSelect, selected }) {
 
 export default function Compliance() {
   const [selectedApp, setSelectedApp] = useState(null);
-  const { data, isLoading, error } = useCompliance();
+  const { data, isPending, error } = useCompliance();
 
-  if (isLoading) return <LoadingSpinner message="Loading compliance view…" />;
+  if (isPending) return <LoadingSpinner message="Loading compliance view…" />;
   if (error) return <div className="p-8 text-red-600 text-sm">Error: {error.message}</div>;
 
   const { total, apps } = data;

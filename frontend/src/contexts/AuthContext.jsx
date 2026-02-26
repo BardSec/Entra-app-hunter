@@ -25,21 +25,30 @@ function MsalAuthProvider({ children }) {
   const { instance, accounts, inProgress } = useMsal();
   const isAuthenticated = useIsAuthenticated();
   const [tokenReady, setTokenReady] = useState(false);
+  const [tokenFailed, setTokenFailed] = useState(false);
   const user = accounts[0] ?? null;
 
   // isLoading stays true while MSAL is processing OR while we are waiting for
   // the initial silent token acquisition to complete.  This prevents API calls
   // (and the 401 that follows) from firing before the token lands in storage.
+  // tokenFailed breaks the wait so the user sees the sign-in page instead of
+  // spinning forever when silent renewal cannot succeed.
   const isMsalBusy = inProgress !== InteractionStatus.None;
-  const isLoading = isMsalBusy || (isAuthenticated && !tokenReady);
+  const isLoading = isMsalBusy || (isAuthenticated && !tokenReady && !tokenFailed);
+
+  // Treat silent-renewal failure as "not authenticated" so AuthGuard shows
+  // the sign-in page and the user can do a fresh interactive login.
+  const effectivelyAuthenticated = isAuthenticated && tokenReady;
 
   // Keep the stored access token fresh whenever the active account changes
   useEffect(() => {
     if (!user) {
       setTokenReady(false);
+      setTokenFailed(false);
       return;
     }
     setTokenReady(false);
+    setTokenFailed(false);
     instance
       .acquireTokenSilent({ scopes: GRAPH_SCOPES, account: user })
       .then((result) => {
@@ -47,10 +56,10 @@ function MsalAuthProvider({ children }) {
         setTokenReady(true);
       })
       .catch(() => {
-        // Silent renewal failed (e.g. consent required) — clear stale token;
-        // the user will be prompted to sign in again via the AuthGuard.
+        // Silent renewal failed (e.g. consent required, token revoked) —
+        // clear any stale token and surface the sign-in page via AuthGuard.
         sessionStorage.removeItem("entra_access_token");
-        setTokenReady(false);
+        setTokenFailed(true);
       });
   }, [user, instance]);
 
@@ -62,7 +71,7 @@ function MsalAuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, user, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated: effectivelyAuthenticated, isLoading, user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

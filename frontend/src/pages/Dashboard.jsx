@@ -72,10 +72,12 @@ function AlertRow({ alert }) {
 }
 
 export default function Dashboard() {
-  const { data, isLoading, error } = useDashboard();
+  const { data, isPending, error } = useDashboard();
   const navigate = useNavigate();
 
-  if (isLoading) return <LoadingSpinner message="Loading dashboard…" />;
+  // isPending stays true for the entire pending state (including retry back-off),
+  // whereas isLoading flips false during the retry delay while data is still undefined.
+  if (isPending) return <LoadingSpinner message="Loading dashboard…" />;
   if (error) {
     return (
       <div className="p-8 text-red-600 text-sm">
