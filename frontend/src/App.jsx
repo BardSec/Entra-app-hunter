@@ -29,7 +29,7 @@ function AuthGuard({ children }) {
 function AppRoutes() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <AuthGuard>
           <Routes>
             <Route path="/" element={<Layout />}>
