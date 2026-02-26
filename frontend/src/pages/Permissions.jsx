@@ -34,9 +34,9 @@ export default function Permissions() {
   const [search, setSearch] = useState("");
   const [riskFilter, setRiskFilter] = useState("");
   const [selectedApp, setSelectedApp] = useState(null);
-  const { data: apps, isLoading, error } = useApps();
+  const { data: apps, isPending, error } = useApps();
 
-  if (isLoading) return <LoadingSpinner message="Loading permissions…" />;
+  if (isPending) return <LoadingSpinner message="Loading permissions…" />;
   if (error) return <div className="p-8 text-red-600 text-sm">Error: {error.message}</div>;
 
   // Flatten permissions from all apps

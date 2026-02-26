@@ -37,7 +37,7 @@ export default function AppInventory() {
     ...(ownerless && { ownerless: "true" }),
   };
 
-  const { data: apps, isLoading, error } = useApps(filters);
+  const { data: apps, isPending, error } = useApps(filters);
 
   // Sync URL params → local state on mount
   useEffect(() => {
@@ -143,7 +143,7 @@ export default function AppInventory() {
 
       {/* Content */}
       <div className={`flex-1 overflow-auto ${selectedApp ? "lg:mr-[448px]" : ""}`}>
-        {isLoading && <LoadingSpinner message="Loading apps…" />}
+        {isPending && <LoadingSpinner message="Loading apps…" />}
         {error && (
           <div className="p-8 text-red-600 text-sm">Failed to load apps: {error.message}</div>
         )}

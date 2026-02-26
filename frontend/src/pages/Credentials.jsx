@@ -55,9 +55,9 @@ function CredRow({ app, cred, onSelectApp, selected }) {
 export default function Credentials() {
   const [activeTab, setActiveTab] = useState("expired");
   const [selectedApp, setSelectedApp] = useState(null);
-  const { data: apps, isLoading, error } = useApps();
+  const { data: apps, isPending, error } = useApps();
 
-  if (isLoading) return <LoadingSpinner message="Loading credentials…" />;
+  if (isPending) return <LoadingSpinner message="Loading credentials…" />;
   if (error) return <div className="p-8 text-red-600 text-sm">Error: {error.message}</div>;
 
   // Build flat list of (app, cred) pairs
