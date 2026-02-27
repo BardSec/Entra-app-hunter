@@ -14,12 +14,16 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Clear stale token on 401 so the next request won't reuse it
+// Clear stale token on 401; surface backend error messages over generic axios text
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
       sessionStorage.removeItem("entra_access_token");
+    }
+    const backendMessage = error.response?.data?.message;
+    if (backendMessage) {
+      error.message = backendMessage;
     }
     return Promise.reject(error);
   }
