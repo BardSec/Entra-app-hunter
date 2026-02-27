@@ -18,6 +18,10 @@ def create_app() -> Flask:
     def handle_permission_error(e):
         return jsonify({"error": "Unauthorized", "message": str(e)}), 401
 
+    @app.errorhandler(Exception)
+    def handle_unexpected_error(e):
+        return jsonify({"error": "Internal server error", "message": str(e)}), 500
+
     @app.route("/api/health")
     def health():
         return jsonify({

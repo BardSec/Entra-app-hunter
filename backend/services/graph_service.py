@@ -53,6 +53,13 @@ class RealGraphService:
 
     def _acquire_app_token(self) -> str:
         """Acquire an app-only token using the client credentials flow."""
+        missing = [k for k, v in [("TENANT_ID", Config.TENANT_ID), ("CLIENT_ID", Config.CLIENT_ID), ("CLIENT_SECRET", Config.CLIENT_SECRET)] if not v]
+        if missing:
+            raise RuntimeError(
+                f"Missing required configuration: {', '.join(missing)}. "
+                "Set these environment variables (or copy .env.example to .env) "
+                "before running with MOCK_MODE=false."
+            )
         import msal  # deferred import so mock mode doesn't require msal install
         app = msal.ConfidentialClientApplication(
             Config.CLIENT_ID,
