@@ -73,11 +73,25 @@ class RealGraphService:
             )
         return result["access_token"]
 
+    @staticmethod
+    def _check_graph_response(resp: "requests.Response", path: str) -> None:
+        """Raise a descriptive error for 403s; raise_for_status for everything else."""
+        if resp.status_code == 403:
+            raise RuntimeError(
+                f"Microsoft Graph returned 403 Forbidden for '{path}'. "
+                "The app registration is missing required API permissions or they have not "
+                "been admin-consented. In the Azure Portal → App registrations → your app → "
+                "API permissions, add these Application (not Delegated) permissions for "
+                "Microsoft Graph and click 'Grant admin consent for <tenant>': "
+                "Organization.Read.All, Application.Read.All."
+            )
+        resp.raise_for_status()
+
     def _get(self, path: str, params: dict | None = None) -> dict:
         url = f"{Config.GRAPH_API_BASE}{path}"
         headers = {"Authorization": f"Bearer {self._token}"}
         resp = requests.get(url, headers=headers, params=params, timeout=30)
-        resp.raise_for_status()
+        self._check_graph_response(resp, path)
         return resp.json()
 
     def _get_all(self, path: str, params: dict | None = None) -> list[dict]:
@@ -88,7 +102,7 @@ class RealGraphService:
         _params = params or {}
         while url:
             resp = requests.get(url, headers=headers, params=_params, timeout=30)
-            resp.raise_for_status()
+            self._check_graph_response(resp, url.split("graph.microsoft.com/v1.0")[-1].split("?")[0])
             data = resp.json()
             items.extend(data.get("value", []))
             url = data.get("@odata.nextLink")
